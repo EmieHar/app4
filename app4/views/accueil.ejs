@@ -1,0 +1,86 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    
+    <title>Document</title>
+    <style>
+        #box{
+            width: 800px;
+            height: fit-content;
+
+        }
+    </style>
+</head>
+<body>
+
+    <% if(locals.session) { %>
+
+
+
+        <a href="/logout">deconnection</a>
+
+
+        <h1>Bonjour, <%= session.firstname %> <%= session.lastname %>  </h1>
+
+
+        <div>
+           <textarea name="message" id="message" cols="30" rows="10"></textarea>
+           <button id="envoi">Envoyer</button>
+        </div>
+
+        <div id="box">
+            <ul id="tchat"></ul>
+        </div>
+    
+    <script>
+        var socket = io();
+
+       
+        var button = $('#envoi');
+        var tchat = $('#tchat');
+
+        button.on('click', function(e){
+                    let message = ($('#message').val())
+                   let nom = "<%= session.firstname %>"
+                   let id = "<%= session.id %>"
+                   let prenom = "<%= session.lastname %>"
+                
+                    if(message) {
+                        socket.emit('new message', { message: message , firstname:nom, lastname:prenom, id:id  });
+                        socket.emit('enregistre message', { message: message , firstname:nom, lastname:prenom, id:id  });
+                        message = '';
+
+                    }
+        })
+
+        socket.on('reponse', function(obj) {
+            console.log(obj.firstname+" "+obj.lastname+" mon id est "+obj.id);
+            console.log(obj.message);
+            var reponse = "<li><h3 class='user'>"+ obj.firstname +" "+ obj.lastname +": </h3><p>"+obj.message +"</p></li>";
+         
+            tchat.append(reponse);
+            window.scrollTo(0,document.body.scrollHeight);
+
+        })
+
+    </script>
+
+
+
+
+
+
+
+
+    <% } else { %>
+
+        <a href="/connection">veuillez vous connecter</a>
+
+   <% } %>
+
+</body>
+</html>
